@@ -2,7 +2,7 @@ const http = require('http');
 const WebSocket = require('ws');
 const fs = require('fs');
 
-const hostname = '127.0.0.1';
+const hostname = 'lairol.github.io';
 const port = 5500;
 
 const server = http.createServer((req, res) => {
