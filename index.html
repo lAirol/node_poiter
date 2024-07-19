@@ -4,130 +4,70 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WebSocket</title>
-  <style>
-    .body{
-      position: relative;
-    }
-    #output{
-      width: 1900px;
-      height: 1080px;
-    }
-    .round {
-      width: 15px;
-      height: 15px;
-      background-color: #3498db;
-      border-radius: 50%;
-      position: absolute;
-      animation: pulse 1s infinite alternate;
-    }
-
-    .square {
-    width: 30px;
-    height: 30px;
-    background-color: red;
-    position: absolute;
-    }
-
-  .fade-out1 {
-    animation: fadeOut1 5s ease forwards;
-  }
-
-  @keyframes pulse {
-  0% {
-    transform: scale(1);
-  }
-  100% {
-    transform: scale(2);
-  }
-}
-
-  @keyframes fadeOut {
-    0% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-    }
-  }
-
-  @keyframes fadeOut1 {
-    0% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-    }
-  }
-  </style>
+  <link href="css/main.css" rel="stylesheet"  type="text/css">
+  <script type="text/javascript" src="js/Elements.js"></script>
+    <script type="text/javascript" src="js/Options.js"></script>
 </head>
 <body class="body">
-  <div id="output"></div>
+    <div id="options" class="options">
+
+    </div>
+    <div id="output"></div>
 
   <script>
-    const socket = new WebSocket('ws://localhost:5500');
+      const socket = new WebSocket('ws://localhost:5500');
+      socket.onopen = () => {
+          console.log('Connected to the WebSocket server');
+      };
 
-    socket.onopen = () => {
-      console.log('Connected to the WebSocket server');
-    };
 
-    socket.onmessage = (event) => {
-      let data = event.data;
-      try {
-        data = JSON.parse(data);
-      } catch (ex) {}
+      let back_color;
+      let options;
+      window.addEventListener("load", () => {
+          options = new Options();
 
-      if (data.type === "move") {
-        createRoundElement(data);
-      } else {
-        createSquareElement(data);
+          window.addEventListener("mousemove", (event) => {
+              if(event.target.id === "output"){
+                  let message_obj = {
+                      offsetX: event.offsetX,
+                      offsetY: event.offsetY,
+                      type: "move",
+                      backgroundColor: options.back_color
+                  };
+                  socket.send(JSON.stringify(message_obj));
+                  Elements.createRoundElement(message_obj,options.back_color);
+              }
+          });
+
+          window.addEventListener("click", (event) => {
+              let message_obj = {
+                  offsetX: event.offsetX,
+                  offsetY: event.offsetY,
+                  type: "click"
+              };
+              socket.send(JSON.stringify(message_obj));
+              Elements.createSquareElement(message_obj);
+          });
+          socket.onmessage = (event) => {
+              let data = event.data;
+              try {
+                  data = JSON.parse(data);
+              } catch (ex) {}
+
+              if (data.type === "move") {
+                  Elements.createRoundElement(data, data.backgroundColor);
+              } else {
+                  Elements.createSquareElement(data);
+              }
+          };
+      })
+
+      function sendMessage() {
+          const messageInput = document.getElementById('messageInput');
+          const message = messageInput.value;
+          socket.send(message);
+          messageInput.value = '';
       }
-    };
-
-  function createSquareElement(data) {
-    // if(data.offsetX>150){
-      const square = document.createElement("div");
-      square.setAttribute("class", "square");
-      square.style.left = data.offsetX + "px";
-      square.style.top = data.offsetY + "px";
-      square.classList.add("fade-out1");
-      document.getElementById("output").append(square);
-      setTimeout(() => {
-        square.remove();
-      }, 5000);
-    // }
-  }
-
-  function createRoundElement(data) {
-      // if(data.offsetX>150){
-        const round = document.createElement("div");
-      round.setAttribute("class", "round");
-      round.style.left = data.offsetX + "px";
-      round.style.top = data.offsetY + "px";
-      round.classList.add("fade-out");
-      document.getElementById("output").append(round);
-      setTimeout(() => {
-        round.remove();
-      }, 1000);
-      // }
-    } 
-
-    function sendMessage() {
-      const messageInput = document.getElementById('messageInput');
-      const message = messageInput.value;
-      socket.send(message);
-      messageInput.value = '';
-    }
-
-    window.addEventListener("mousemove",(event)=>{
-        let message_obj = {offsetX:event.offsetX,offsetY:event.offsetY,type:"move"};
-        socket.send(JSON.stringify(message_obj));
-        createRoundElement(message_obj);
-    });
-    window.addEventListener("click",(event)=>{
-        let message_obj = {offsetX:event.offsetX,offsetY:event.offsetY,type:"click"};
-        socket.send(JSON.stringify(message_obj));
-        createSquareElement(message_obj);
-    });
   </script>
 </body>
 </html>
