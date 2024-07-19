@@ -15,7 +15,8 @@
     <div id="output"></div>
 
   <script>
-      const socket = new WebSocket('ws://localhost:5500');
+      const ws = new WebSocket(`ws://${process.env.RENDER_EXTERNAL_URL}`);
+
       socket.onopen = () => {
           console.log('Connected to the WebSocket server');
       };
