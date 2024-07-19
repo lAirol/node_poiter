@@ -15,7 +15,7 @@
     <div id="output"></div>
 
   <script>
-      const socket = new WebSocket('ws://0.0.0.0:10000/');
+      const socket = new WebSocket('wss://node-poiter.onrender.com');
       socket.onopen = () => {
           console.log('Connected to the WebSocket server');
       };
