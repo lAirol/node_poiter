@@ -2,13 +2,14 @@ const http = require('http');
 const WebSocket = require('ws');
 const fs = require('fs');
 
-const hostname = '127.0.0.1';
-const port = 5500;
+const hostname = '0.0.0.0'; // Listen on all interfaces (for Render)
+const port = process.env.PORT || 5500; // Use environment variable or default
 
 const server = http.createServer((req, res) => {
     if (req.method === 'GET') {
         const url = req.url;
         const filePath = __dirname + url;
+
         // Check for static file requests (index.html or Elements.js)
         if (url === '/' || url.endsWith('.js') || url.endsWith('.css') || url.endsWith('.html')) {
             try {
@@ -19,7 +20,7 @@ const server = http.createServer((req, res) => {
                     res.end('Not Found');
                 });
 
-                const contentType = url.endsWith('.js') ? 'text/javascript' : (url.endsWith('.css') ? "text/css" :'text/html'); // Set appropriate content type
+                const contentType = url.endsWith('.js') ? 'text/javascript' : (url.endsWith('.css') ? 'text/css' : 'text/html'); // Set appropriate content type
                 res.writeHead(200, { 'Content-Type': contentType });
                 readStream.pipe(res);
             } catch (err) {
